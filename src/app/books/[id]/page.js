@@ -12,6 +12,8 @@ export default function BookDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showSummary, setShowSummary] = useState(false)
+  const [summaryData, setSummaryData] = useState(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
 
   useEffect(() => {
     const fetchBookDetail = async () => {
@@ -45,6 +47,30 @@ export default function BookDetail() {
     })
   }
 
+  // 요약 정보 가져오기
+  const fetchSummary = async () => {
+    if (!book) return
+    
+    setSummaryLoading(true)
+    try {
+      const response = await axios.get(`http://localhost:8080/api/books/${book.id}/summary/latest`)
+      setSummaryData(response.data)
+    } catch (err) {
+      console.error('Error fetching summary:', err)
+      // 요약 정보가 없어도 모달은 열 수 있도록 에러를 무시
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
+  // 요약 모달 열기
+  const handleOpenSummary = () => {
+    setShowSummary(true)
+    if (!summaryData) {
+      fetchSummary()
+    }
+  }
+
   // 요약 모달 컴포넌트
   const SummaryModal = () => {
     if (!showSummary) return null
@@ -56,11 +82,11 @@ export default function BookDetail() {
             <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
           </div>
           
-          <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+          <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
             <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  📚 {book.title} - 읽은 내용 요약
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  📚 {book.title} - 마지막 읽은 내용 요약
                 </h3>
                 <button
                   onClick={() => setShowSummary(false)}
@@ -74,72 +100,135 @@ export default function BookDetail() {
               
               <div className="space-y-6">
                 {/* 책 기본 정보 요약 */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                  <h4 className="text-xl font-semibold text-blue-800 dark:text-blue-200 mb-4">
                     📖 책 정보 요약
                   </h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-6 text-sm">
                     <div>
                       <span className="font-medium text-blue-700 dark:text-blue-300">제목:</span>
-                      <p className="text-blue-600 dark:text-blue-400">{book.title}</p>
+                      <p className="text-blue-600 dark:text-blue-400 font-medium">{book.title}</p>
                     </div>
                     <div>
                       <span className="font-medium text-blue-700 dark:text-blue-300">저자:</span>
-                      <p className="text-blue-600 dark:text-blue-400">{book.author}</p>
+                      <p className="text-blue-600 dark:text-blue-400 font-medium">{book.author}</p>
                     </div>
                     <div>
-                      <span className="font-medium text-blue-700 dark:text-blue-300">페이지:</span>
-                      <p className="text-blue-600 dark:text-blue-400">{book.totalPages}페이지</p>
+                      <span className="font-medium text-blue-700 dark:text-blue-300">전체 페이지:</span>
+                      <p className="text-blue-600 dark:text-blue-400 font-medium">{book.totalPages}페이지</p>
                     </div>
                     <div>
                       <span className="font-medium text-blue-700 dark:text-blue-300">ISBN:</span>
-                      <p className="text-blue-600 dark:text-blue-400 font-mono">{book.isbn}</p>
+                      <p className="text-blue-600 dark:text-blue-400 font-mono font-medium">{book.isbn}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* 읽은 내용 요약 */}
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-green-800 dark:text-green-200 mb-2">
-                    📝 읽은 내용 요약
+                {/* 마지막 읽은 내용 요약 */}
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+                  <h4 className="text-xl font-semibold text-green-800 dark:text-green-200 mb-4">
+                    📝 마지막 읽은 내용 요약
                   </h4>
-                  <div className="space-y-3 text-sm text-green-700 dark:text-green-300">
-                    <p>
-                      <span className="font-medium">주요 내용:</span> {book.title}은 {book.author}의 대표작으로, 
-                      {book.totalPages}페이지에 걸쳐 깊이 있는 이야기를 담고 있습니다.
-                    </p>
-                    <p>
-                      <span className="font-medium">핵심 주제:</span> 이 책은 인간의 본성과 사회적 관계, 
-                      그리고 삶의 의미에 대한 깊은 통찰을 제공합니다.
-                    </p>
-                    <p>
-                      <span className="font-medium">독서 진행도:</span> 현재 전체 {book.totalPages}페이지 중 
-                      약 60% 정도를 읽었으며, 흥미진진한 전개가 계속되고 있습니다.
-                    </p>
+                  {summaryLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                      <span className="ml-3 text-green-700 dark:text-green-300">요약 정보를 불러오는 중...</span>
+                    </div>
+                  ) : summaryData ? (
+                    <div className="space-y-4">
+                      <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border border-green-200 dark:border-green-700">
+                        <p className="text-green-800 dark:text-green-200 text-lg leading-relaxed">
+                          {summaryData}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>최근 업데이트된 요약 정보입니다</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="mb-4">
+                        <svg className="mx-auto h-12 w-12 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <p className="text-green-600 dark:text-green-400">
+                        아직 읽은 내용 요약이 없습니다.<br />
+                        책을 읽으면서 요약 정보가 업데이트될 예정입니다.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 독서 진행 상황 */}
+                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
+                  <h4 className="text-xl font-semibold text-purple-800 dark:text-purple-200 mb-4">
+                    📊 독서 진행 상황
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-purple-700 dark:text-purple-300 font-medium">전체 진행도</span>
+                      <span className="text-purple-600 dark:text-purple-400 font-semibold">
+                        {summaryData ? '진행 중' : '시작 전'}
+                      </span>
+                    </div>
+                    <div className="w-full bg-purple-200 dark:bg-purple-700 rounded-full h-3">
+                      <div 
+                        className={`h-3 rounded-full transition-all duration-500 ${
+                          summaryData 
+                            ? 'bg-purple-500 dark:bg-purple-400' 
+                            : 'bg-purple-300 dark:bg-purple-600'
+                        }`}
+                        style={{ width: summaryData ? '60%' : '0%' }}
+                      ></div>
+                    </div>
+                    <div className="text-sm text-purple-600 dark:text-purple-400">
+                      {summaryData 
+                        ? `현재 ${book.totalPages}페이지 중 약 60% 정도를 읽었습니다.`
+                        : '아직 독서를 시작하지 않았습니다.'
+                      }
+                    </div>
                   </div>
                 </div>
 
-                {/* 독서 노트 */}
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
-                    ✍️ 독서 노트
-                  </h4>
-                  <div className="space-y-2 text-sm text-yellow-700 dark:text-yellow-300">
-                    <p>• 인상 깊은 문장이나 구절을 메모해보세요</p>
-                    <p>• 등장인물들의 관계와 성격을 정리해보세요</p>
-                    <p>• 책을 통해 얻은 인사이트를 기록해보세요</p>
+                {/* 독서 노트 및 계획 */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* 독서 노트 */}
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-3">
+                      ✍️ 독서 노트
+                    </h4>
+                    <div className="space-y-2 text-sm text-yellow-700 dark:text-yellow-300">
+                      <p>• 인상 깊은 문장이나 구절을 메모해보세요</p>
+                      <p>• 등장인물들의 관계와 성격을 정리해보세요</p>
+                      <p>• 책을 통해 얻은 인사이트를 기록해보세요</p>
+                      <p>• 궁금한 점이나 의문점을 정리해보세요</p>
+                    </div>
                   </div>
-                </div>
 
-                {/* 다음 독서 계획 */}
-                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-purple-800 dark:text-purple-200 mb-2">
-                    🎯 다음 독서 계획
-                  </h4>
-                  <div className="space-y-2 text-sm text-purple-700 dark:text-purple-400">
-                    <p>• 남은 {Math.floor(book.totalPages * 0.4)}페이지를 이번 주 내에 완독하기</p>
-                    <p>• {book.author}의 다른 작품도 찾아보기</p>
-                    <p>• 독서 모임에서 이 책에 대해 토론하기</p>
+                  {/* 다음 독서 계획 */}
+                  <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-indigo-800 dark:text-indigo-200 mb-3">
+                      🎯 다음 독서 계획
+                    </h4>
+                    <div className="space-y-2 text-sm text-indigo-700 dark:text-indigo-400">
+                      {summaryData ? (
+                        <>
+                          <p>• 남은 {Math.floor(book.totalPages * 0.4)}페이지를 이번 주 내에 완독하기</p>
+                          <p>• {book.author}의 다른 작품도 찾아보기</p>
+                          <p>• 독서 모임에서 이 책에 대해 토론하기</p>
+                        </>
+                      ) : (
+                        <>
+                          <p>• 이번 주에 독서를 시작해보세요</p>
+                          <p>• 매일 30분씩 독서 시간을 가져보세요</p>
+                          <p>• 독서 목표를 세워보세요</p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -326,18 +415,18 @@ export default function BookDetail() {
              </div>
            </div>
 
-           {/* 요약보기 버튼 */}
-           <div className="px-8 py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600">
-             <button
-               onClick={() => setShowSummary(true)}
-               className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3"
-             >
-               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-               </svg>
-               📖 현재까지 읽은 내용 요약보기
-             </button>
-           </div>
+                       {/* 요약보기 버튼 */}
+            <div className="px-8 py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600">
+              <button
+                onClick={handleOpenSummary}
+                className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                📖 마지막 읽은 내용 요약보기
+              </button>
+            </div>
         </div>
       </div>
       
