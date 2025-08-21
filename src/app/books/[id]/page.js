@@ -14,6 +14,7 @@ export default function BookDetail() {
   const [showSummary, setShowSummary] = useState(false)
   const [summaryData, setSummaryData] = useState(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
+  const [showLibraryModal, setShowLibraryModal] = useState(false)
 
   useEffect(() => {
     const fetchBookDetail = async () => {
@@ -69,6 +70,18 @@ export default function BookDetail() {
     if (!summaryData) {
       fetchSummary()
     }
+  }
+
+  // 서재 담기 모달 열기
+  const handleAddToLibrary = () => {
+    setShowLibraryModal(true)
+  }
+
+  // 서재 확인 페이지로 이동
+  const handleGoToLibrary = () => {
+    setShowLibraryModal(false)
+    // 여기에 서재 페이지로 이동하는 로직 추가
+    router.push('/library') // 또는 실제 서재 페이지 경로
   }
 
   // 요약 모달 컴포넌트
@@ -248,6 +261,54 @@ export default function BookDetail() {
     )
   }
 
+  // 서재 담기 모달 컴포넌트
+  const LibraryModal = () => {
+    if (!showLibraryModal) return null
+
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+          <div className="fixed inset-0 transition-opacity" onClick={() => setShowLibraryModal(false)}>
+            <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+          </div>
+          
+          <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                  <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  내 서재에 담겼습니다
+                </h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  바로 확인하시겠습니까?
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+              <button
+                onClick={handleGoToLibrary}
+                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                예
+              </button>
+              <button
+                onClick={() => setShowLibraryModal(false)}
+                className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                아니오
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen p-8 flex items-center justify-center" style={{ backgroundColor: '#FAFAFA' }}>
@@ -401,12 +462,15 @@ export default function BookDetail() {
                    바로 읽기
                  </button>
                  
-                 <button className="px-6 py-3 bg-white text-black font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors flex items-center gap-2">
-                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                   </svg>
-                   내서재에 담기
-                 </button>
+                                   <button 
+                    onClick={handleAddToLibrary}
+                    className="px-6 py-3 bg-white text-black font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    내서재에 담기
+                  </button>
                  
                  <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50">
                    <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -420,6 +484,9 @@ export default function BookDetail() {
       
       {/* 요약 모달 */}
       <SummaryModal />
+      
+      {/* 서재 담기 모달 */}
+      <LibraryModal />
     </div>
   )
 }

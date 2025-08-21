@@ -1,114 +1,227 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 
 export default function Home() {
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showSignupModal, setShowSignupModal] = useState(false)
+  const [isLoginMode, setIsLoginMode] = useState(true)
+
+  const openLoginModal = () => {
+    setIsLoginMode(true)
+    setShowLoginModal(true)
+  }
+
+  const openSignupModal = () => {
+    setIsLoginMode(false)
+    setShowSignupModal(true)
+  }
+
+  const closeModal = () => {
+    setShowLoginModal(false)
+    setShowSignupModal(false)
+  }
+
+  const switchToSignup = () => {
+    setIsLoginMode(false)
+  }
+
+  const switchToLogin = () => {
+    setIsLoginMode(true)
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
+    <main className="min-h-screen bg-gradient-to-br from-white via-yellow-100 via-yellow-200 via-purple-200 to-purple-600">
+      {/* 헤더 */}
+      <header className="bg-white bg-opacity-90 backdrop-blur-sm shadow-sm">
+        <div className="pl-16 sm:pl-24 lg:pl-32 pr-16 sm:pr-24 lg:pr-32">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold text-gray-900">밀리의 서재</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={openLoginModal}
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium"
+              >
+                로그인
+              </button>
+              <button
+                onClick={openSignupModal}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                회원가입
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 메인 콘텐츠 - 텍스트와 이미지를 좌우로 배치 */}
+      <div className="flex items-center justify-between min-h-[calc(100vh-4rem)] pl-32 sm:pl-40 lg:pl-48 pr-90 sm:pr-48 lg:pr-56">
+        {/* 왼쪽: 메인 텍스트 */}
+        <div className="flex-1 pr-4 sm:pr-6 lg:pr-8">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold drop-shadow-lg" style={{ lineHeight: '1.7' }}>
+            <span className="text-black">독서와<br />
+            무제한 친해지리,</span><br />
+            <span className="text-orange-500">밀리의 서재</span>
+          </h2>
+        </div>
+        
+        {/* 오른쪽: 이미지들 */}
+        <div className="flex-1 flex justify-end pl-4 sm:pl-6 lg:pl-8">
+          {/* 두 권의 책을 겹치게 배치 */}
+          <div className="relative">
+            {/* 뒤쪽 책 (새로운 책) */}
             <img
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
+              src="https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9781408855652.jpg"
+              alt="새로운 책 이미지"
+              className="max-w-md w-full h-auto rounded-lg shadow-lg transform rotate-3 translate-x-2"
             />
-          </a>
+            {/* <img
+              src="https://image.yes24.com/goods/115156480/XL"
+              alt="새로운 책 이미지"
+              className="max-w-md w-full h-auto rounded-lg shadow-lg transform rotate-3 translate-x-2"
+            /> */}
+            {/* 앞쪽 책 (어린왕자) */}
+            <img
+              src="https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9791187192596.jpg"
+              alt="밀리의 서재 이미지"
+              className="max-w-md w-full h-auto rounded-lg shadow-lg absolute top-0 left-0 transform -rotate-2 -translate-x-2"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:translate-y-1/2 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <img
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-        />
+      {/* 로그인/회원가입 모달 */}
+      {(showLoginModal || showSignupModal) && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" onClick={closeModal}>
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <Link
-          href="/about"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            About{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            프로젝트에 대해 알아보세요.
-          </p>
-        </Link>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {isLoginMode ? '로그인' : '회원가입'}
+                  </h3>
+                  <button
+                    onClick={closeModal}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
 
-        <Link
-          href="/api-example"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            API Example{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Axios를 사용한 API 통신 예제를 확인하세요.
-          </p>
-        </Link>
-
-        <Link
-          href="/components"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Components{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            재사용 가능한 컴포넌트들을 확인하세요.
-          </p>
-        </Link>
-
-        <Link
-          href="/books"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            📚 Books{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            도서관에 등록된 책 목록을 확인하세요.
-          </p>
-        </Link>
-
-        <Link
-          href="/docs"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            프로젝트 문서를 확인하세요.
-          </p>
-        </Link>
+                {isLoginMode ? (
+                  // 로그인 폼
+                  <form className="space-y-4">
+                    <div>
+                      <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
+                        이메일
+                      </label>
+                      <input
+                        type="email"
+                        id="login-email"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="이메일을 입력하세요"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
+                        비밀번호
+                      </label>
+                      <input
+                        type="password"
+                        id="login-password"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="비밀번호를 입력하세요"
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium"
+                    >
+                      로그인
+                    </button>
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={switchToSignup}
+                        className="text-sm text-blue-600 hover:text-blue-800"
+                      >
+                        계정이 없으신가요? 회원가입
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  // 회원가입 폼
+                  <form className="space-y-4">
+                    <div>
+                      <label htmlFor="signup-username" className="block text-sm font-medium text-gray-700 mb-1">
+                        사용자 이름 *
+                      </label>
+                      <input
+                        type="text"
+                        id="signup-username"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="사용자 이름을 입력하세요"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700 mb-1">
+                        이메일 *
+                      </label>
+                      <input
+                        type="email"
+                        id="signup-email"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="이메일을 입력하세요"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="signup-password" className="block text-sm font-medium text-gray-700 mb-1">
+                        비밀번호 *
+                      </label>
+                      <input
+                        type="password"
+                        id="signup-password"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="비밀번호를 입력하세요"
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium"
+                    >
+                      회원가입
+                    </button>
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={switchToLogin}
+                        className="text-sm text-blue-600 hover:text-blue-800"
+                      >
+                        이미 계정이 있으신가요? 로그인
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
       </div>
+      )}
     </main>
   )
 }
