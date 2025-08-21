@@ -3,8 +3,20 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Link from 'next/link'
+import BookCard from '../../components/BookCard'
 
 export default function Books() {
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return '날짜 없음'
+    const date = new Date(dateString)
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -14,6 +26,7 @@ export default function Books() {
     setError(null)
     try {
       const response = await axios.get('http://localhost:8080/api/books')
+      console.log('Books data:', response.data) // 디버깅용
       setBooks(response.data)
     } catch (err) {
       setError('책 목록을 불러오는 중 오류가 발생했습니다.')
@@ -27,16 +40,7 @@ export default function Books() {
     fetchBooks()
   }, [])
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+
 
   return (
     <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900">
@@ -95,13 +99,33 @@ export default function Books() {
         {/* 책 목록 */}
         {books.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {books.map((book) => (
-              <div key={book.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="p-6">
-                  {/* 책 제목 */}
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                    {book.title}
-                  </h3>
+                         {books.map((book) => (
+               <div key={book.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-shadow">
+                 {/* 책 표지 이미지 */}
+                 {book.imageUrl && (
+                   <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                     <img
+                       src={book.imageUrl}
+                       alt={`${book.title} 표지`}
+                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                       onError={(e) => {
+                         e.target.style.display = 'none'
+                         e.target.nextSibling.style.display = 'flex'
+                       }}
+                     />
+                     <div className="hidden w-full h-full items-center justify-center text-gray-500 dark:text-gray-400">
+                       <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                       </svg>
+                     </div>
+                   </div>
+                 )}
+                 
+                 <div className="p-6">
+                   {/* 책 제목 */}
+                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                     {book.title}
+                   </h3>
                   
                   {/* 저자 */}
                   <div className="flex items-center gap-2 mb-3">
