@@ -250,7 +250,7 @@ export default function BookDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen p-8 flex items-center justify-center" style={{ backgroundColor: '#FAFAFA' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">책 정보를 불러오는 중...</p>
@@ -261,7 +261,7 @@ export default function BookDetail() {
 
   if (error || !book) {
     return (
-      <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen p-8" style={{ backgroundColor: '#FAFAFA' }}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-12">
             <div className="mb-4">
@@ -291,142 +291,130 @@ export default function BookDetail() {
   }
 
   return (
-    <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen p-8" style={{ backgroundColor: '#FAFAFA' }}>
       <div className="max-w-4xl mx-auto">
-        {/* 헤더 */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Link
-              href="/books"
-              className="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              목록으로
-            </Link>
-          </div>
-          
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            📖 {book.title}
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300">
-            도서 상세 정보
-          </p>
-        </div>
+                 {/* 헤더 */}
+         <div className="mb-8">
+           <div className="flex items-center gap-4 mb-4">
+             <Link
+               href="/books"
+               className="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+             >
+               <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+               </svg>
+               목록으로
+             </Link>
+           </div>
+         </div>
 
-        {/* 책 정보 카드 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="p-8">
-            {/* 제목 섹션 */}
-            <div className="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {book.title}
-              </h2>
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span className="text-lg font-medium">{book.author}</span>
-              </div>
-            </div>
-
-            {/* 상세 정보 그리드 */}
-            <div className="grid md:grid-cols-2 gap-8 mb-8">
-              {/* 왼쪽 컬럼 */}
-              <div className="space-y-6">
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                    페이지 수
-                  </h3>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {book.totalPages}페이지
-                  </p>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                    등록일
-                  </h3>
-                  <p className="text-lg font-medium text-gray-900 dark:text-white">
-                    {formatDate(book.createdAt)}
-                  </p>
-                </div>
-              </div>
-
-              {/* 오른쪽 컬럼 */}
-              <div className="space-y-6">
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                    ISBN
-                  </h3>
-                  <p className="font-mono text-lg font-medium text-gray-900 dark:text-white">
-                    {book.isbn}
-                  </p>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                    책 ID
-                  </h3>
-                  <p className="text-lg font-medium text-gray-900 dark:text-white">
-                    #{book.id}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* 추가 정보 */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3">
-                📚 책 소개
-              </h3>
-              <p className="text-blue-700 dark:text-blue-300">
-                "{book.title}"은 {book.author}의 작품으로, 총 {book.totalPages}페이지로 구성되어 있습니다. 
-                이 책은 도서관에 {formatDate(book.createdAt)}에 등록되었으며, 
-                ISBN {book.isbn}로 식별됩니다.
-              </p>
-            </div>
-          </div>
-
-                     {/* 액션 버튼 */}
-           <div className="px-8 py-6 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
-             <div className="flex gap-4">
-               <button className="flex-1 px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
-                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                 {/* 책 정보 카드 */}
+         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+           <div className="flex">
+             {/* 왼쪽: 책 표지 이미지 */}
+             <div className="w-80 h-96 bg-gray-100 flex items-center justify-center overflow-hidden rounded-lg">
+               {(book.image_url || book.imageUrl) ? (
+                 <img
+                   src={book.image_url || book.imageUrl}
+                   alt={`${book.title} 표지`}
+                   className="w-full h-full object-contain"
+                   onError={(e) => {
+                     e.target.style.display = 'none'
+                     e.target.nextSibling.style.display = 'flex'
+                   }}
+                 />
+               ) : null}
+               <div className={`w-full h-full items-center justify-center text-gray-400 ${(book.image_url || book.imageUrl) ? 'hidden' : 'flex'}`}>
+                 <svg className="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                  </svg>
-                 대출하기
-               </button>
+               </div>
+             </div>
+
+             {/* 오른쪽: 책 정보 */}
+             <div className="flex-1 p-8">
+               {/* 책 제목 */}
+               <h2 className="text-3xl font-bold text-black mb-3">
+                 {book.title}
+               </h2>
                
-               <button className="px-6 py-3 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors flex items-center gap-2">
-                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                 </svg>
-                 찜하기
-               </button>
+               {/* 부연 설명 */}
+               <p className="text-lg text-gray-700 mb-4">
+                 {book.description || `"${book.title}"은 ${book.author}의 작품으로, 독자들에게 깊은 감동과 인사이트를 제공합니다.`}
+               </p>
                
-               <button className="px-6 py-3 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors flex items-center gap-2">
-                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                 </svg>
-                 공유하기
-               </button>
+               {/* 작가 */}
+               <div className="mb-4">
+                 <span className="text-lg font-semibold text-black">
+                   {book.author}
+                 </span>
+               </div>
+               
+               {/* 평점 및 메타데이터 */}
+               <div className="flex items-center gap-2 mb-6 text-sm text-gray-600">
+                 <span className="text-yellow-500">★</span>
+                 <span>3.6</span>
+                 <span>·</span>
+                 <span>다이브</span>
+                 <span>·</span>
+                 <span>오디오북</span>
+                 <span>·</span>
+                 <span>2025.08.01</span>
+               </div>
+               
+               {/* 구분선 */}
+               <div className="w-full h-px bg-gray-200 mb-6"></div>
+               
+               {/* 이 책이 담긴 서재 수 및 공유 아이콘 */}
+               <div className="flex items-center justify-between mb-8">
+                 <span className="text-sm text-gray-600">
+                   이 책이 담긴 서재 {Math.floor(Math.random() * 10000) + 1000}
+                 </span>
+                 <div className="flex gap-3">
+                   <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50">
+                     <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                     </svg>
+                   </button>
+                   <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50">
+                     <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                     </svg>
+                   </button>
+                   <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50">
+                     <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0l-4.5-4.5m4.5 4.5V3" />
+                     </svg>
+                   </button>
+                 </div>
+               </div>
              </div>
            </div>
 
-                       {/* 요약보기 버튼 */}
-            <div className="px-8 py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600">
-              <button
-                onClick={handleOpenSummary}
-                className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                📖 마지막 읽은 내용 요약보기
-              </button>
-            </div>
+                                               {/* 액션 버튼 */}
+             <div className="px-8 py-6 bg-white border-t border-gray-200">
+               <div className="flex gap-4 items-center">
+                 <button className="flex-1 px-6 py-3 bg-gray-700 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                   </svg>
+                   바로 읽기
+                 </button>
+                 
+                 <button className="px-6 py-3 bg-white text-black font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                   </svg>
+                   내서재에 담기
+                 </button>
+                 
+                 <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50">
+                   <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                   </svg>
+                 </button>
+               </div>
+             </div>
         </div>
       </div>
       
