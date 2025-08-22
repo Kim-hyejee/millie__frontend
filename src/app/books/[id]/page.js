@@ -11,10 +11,12 @@ export default function BookDetail() {
   const [book, setBook] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [showSummary, setShowSummary] = useState(false)
+  const [showLibraryModal, setShowLibraryModal] = useState(false)
+  const [showReaderModal, setShowReaderModal] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
   const [summaryData, setSummaryData] = useState(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
-  const [showLibraryModal, setShowLibraryModal] = useState(false)
+  const [showSummary, setShowSummary] = useState(false) // 요약 정보 표시 여부
 
   useEffect(() => {
     const fetchBookDetail = async () => {
@@ -48,217 +50,49 @@ export default function BookDetail() {
     })
   }
 
-  // 요약 정보 가져오기
-  const fetchSummary = async () => {
-    if (!book) return
-    
-    setSummaryLoading(true)
-    try {
-      const response = await axios.get(`http://localhost:8080/api/books/${book.id}/summary/latest`)
-      setSummaryData(response.data)
-    } catch (err) {
-      console.error('Error fetching summary:', err)
-      // 요약 정보가 없어도 모달은 열 수 있도록 에러를 무시
-    } finally {
-      setSummaryLoading(false)
-    }
+  // 바로 읽기 모달 열기
+  const openReader = () => {
+    setShowReaderModal(true)
+    setCurrentPage(1)
+    setShowSummary(false) // 요약 정보 숨기기
   }
 
-  // 요약 모달 열기
-  const handleOpenSummary = () => {
-    setShowSummary(true)
-    if (!summaryData) {
-      fetchSummary()
-    }
+  // 요약 보기 모달 열기
+  const fetchSummary = async () => {
+    setShowReaderModal(true)
+    setCurrentPage(1)
+    setShowSummary(true) // 요약 정보 보이기
   }
 
   // 서재 담기 모달 열기
-  const handleAddToLibrary = () => {
-    setShowLibraryModal(true)
+  const handleAddToLibrary = async () => {
+    try {
+      // 내 서재에 도서 추가하는 API 호출
+      const response = await axios.post(`http://localhost:8080/api/library/books`, {
+        bookId: params.id
+      })
+      
+      if (response.data.success) {
+        alert('내 서재에 성공적으로 담겼습니다!')
+        // 모달 닫기
+        setShowLibraryModal(false)
+      } else {
+        alert('내 서재에 담기 실패: ' + (response.data.message || '알 수 없는 오류'))
+      }
+    } catch (error) {
+      console.error('Error adding book to library:', error)
+      if (error.response) {
+        alert('내 서재에 담기 실패: ' + (error.response.data?.message || '서버 오류'))
+      } else {
+        alert('내 서재에 담기 실패: 네트워크 오류가 발생했습니다.')
+      }
+    }
   }
 
   // 서재 확인 페이지로 이동
   const handleGoToLibrary = () => {
     setShowLibraryModal(false)
-    // 여기에 서재 페이지로 이동하는 로직 추가
-    router.push('/library') // 또는 실제 서재 페이지 경로
-  }
-
-  // 요약 모달 컴포넌트
-  const SummaryModal = () => {
-    if (!showSummary) return null
-
-    return (
-      <div className="fixed inset-0 z-50 overflow-y-auto">
-        <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          <div className="fixed inset-0 transition-opacity" onClick={() => setShowSummary(false)}>
-            <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-          </div>
-          
-          <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-            <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  📚 {book.title} - 마지막 읽은 내용 요약
-                </h3>
-                <button
-                  onClick={() => setShowSummary(false)}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <div className="space-y-6">
-                {/* 책 기본 정보 요약 */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-                  <h4 className="text-xl font-semibold text-blue-800 dark:text-blue-200 mb-4">
-                    📖 책 정보 요약
-                  </h4>
-                  <div className="grid grid-cols-2 gap-6 text-sm">
-                    <div>
-                      <span className="font-medium text-blue-700 dark:text-blue-300">제목:</span>
-                      <p className="text-blue-600 dark:text-blue-400 font-medium">{book.title}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-700 dark:text-blue-300">저자:</span>
-                      <p className="text-blue-600 dark:text-blue-400 font-medium">{book.author}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-700 dark:text-blue-300">전체 페이지:</span>
-                      <p className="text-blue-600 dark:text-blue-400 font-medium">{book.totalPages}페이지</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-700 dark:text-blue-300">ISBN:</span>
-                      <p className="text-blue-600 dark:text-blue-400 font-mono font-medium">{book.isbn}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 마지막 읽은 내용 요약 */}
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
-                  <h4 className="text-xl font-semibold text-green-800 dark:text-green-200 mb-4">
-                    📝 마지막 읽은 내용 요약
-                  </h4>
-                  {summaryLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-                      <span className="ml-3 text-green-700 dark:text-green-300">요약 정보를 불러오는 중...</span>
-                    </div>
-                  ) : summaryData ? (
-                    <div className="space-y-4">
-                      <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border border-green-200 dark:border-green-700">
-                        <p className="text-green-800 dark:text-green-200 text-lg leading-relaxed">
-                          {summaryData}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>최근 업데이트된 요약 정보입니다</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <div className="mb-4">
-                        <svg className="mx-auto h-12 w-12 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      </div>
-                      <p className="text-green-600 dark:text-green-400">
-                        아직 읽은 내용 요약이 없습니다.<br />
-                        책을 읽으면서 요약 정보가 업데이트될 예정입니다.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* 독서 진행 상황 */}
-                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
-                  <h4 className="text-xl font-semibold text-purple-800 dark:text-purple-200 mb-4">
-                    📊 독서 진행 상황
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-purple-700 dark:text-purple-300 font-medium">전체 진행도</span>
-                      <span className="text-purple-600 dark:text-purple-400 font-semibold">
-                        {summaryData ? '진행 중' : '시작 전'}
-                      </span>
-                    </div>
-                    <div className="w-full bg-purple-200 dark:bg-purple-700 rounded-full h-3">
-                      <div 
-                        className={`h-3 rounded-full transition-all duration-500 ${
-                          summaryData 
-                            ? 'bg-purple-500 dark:bg-purple-400' 
-                            : 'bg-purple-300 dark:bg-purple-600'
-                        }`}
-                        style={{ width: summaryData ? '60%' : '0%' }}
-                      ></div>
-                    </div>
-                    <div className="text-sm text-purple-600 dark:text-purple-400">
-                      {summaryData 
-                        ? `현재 ${book.totalPages}페이지 중 약 60% 정도를 읽었습니다.`
-                        : '아직 독서를 시작하지 않았습니다.'
-                      }
-                    </div>
-                  </div>
-                </div>
-
-                {/* 독서 노트 및 계획 */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  {/* 독서 노트 */}
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
-                    <h4 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-3">
-                      ✍️ 독서 노트
-                    </h4>
-                    <div className="space-y-2 text-sm text-yellow-700 dark:text-yellow-300">
-                      <p>• 인상 깊은 문장이나 구절을 메모해보세요</p>
-                      <p>• 등장인물들의 관계와 성격을 정리해보세요</p>
-                      <p>• 책을 통해 얻은 인사이트를 기록해보세요</p>
-                      <p>• 궁금한 점이나 의문점을 정리해보세요</p>
-                    </div>
-                  </div>
-
-                  {/* 다음 독서 계획 */}
-                  <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-6">
-                    <h4 className="text-lg font-semibold text-indigo-800 dark:text-indigo-200 mb-3">
-                      🎯 다음 독서 계획
-                    </h4>
-                    <div className="space-y-2 text-sm text-indigo-700 dark:text-indigo-400">
-                      {summaryData ? (
-                        <>
-                          <p>• 남은 {Math.floor(book.totalPages * 0.4)}페이지를 이번 주 내에 완독하기</p>
-                          <p>• {book.author}의 다른 작품도 찾아보기</p>
-                          <p>• 독서 모임에서 이 책에 대해 토론하기</p>
-                        </>
-                      ) : (
-                        <>
-                          <p>• 이번 주에 독서를 시작해보세요</p>
-                          <p>• 매일 30분씩 독서 시간을 가져보세요</p>
-                          <p>• 독서 목표를 세워보세요</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button
-                onClick={() => setShowSummary(false)}
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                닫기
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+    router.push('/library')
   }
 
   // 서재 담기 모달 컴포넌트
@@ -453,40 +287,245 @@ export default function BookDetail() {
            </div>
 
                                                {/* 액션 버튼 */}
-             <div className="px-8 py-6 bg-white border-t border-gray-200">
-               <div className="flex gap-4 items-center">
-                 <button className="flex-1 px-6 py-3 bg-gray-700 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
-                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                   </svg>
-                   바로 읽기
-                 </button>
-                 
-                                   <button 
-                    onClick={handleAddToLibrary}
-                    className="px-6 py-3 bg-white text-black font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors flex items-center gap-2"
+              <div className="px-8 py-6 bg-white border-t border-gray-200">
+                <div className="flex gap-4 items-center">
+                  {/* 바로 읽기 버튼 */}
+                  <button 
+                    onClick={openReader}
+                    className="flex-1 bg-gray-700 text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
                   >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    바로 읽기
+                  </button>
+                  
+                  {/* 요약 보기 버튼 */}
+                  <button 
+                    onClick={fetchSummary}
+                    className="flex-1 bg-yellow-500 text-black py-3 px-6 rounded-lg hover:bg-yellow-600 transition-colors flex items-center justify-center gap-2 border-2 border-yellow-700"
+                    style={{ minHeight: '48px' }}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    🔍 요약 보기
+                  </button>
+                  
+                  {/* 내 서재에 담기 버튼 */}
+                  <button 
+                    onClick={handleAddToLibrary}
+                    className="flex-1 bg-white text-black py-3 px-6 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                    내 서재에 담기
+                  </button>
+                  
+                  {/* 하트 버튼 */}
+                  <button className="w-12 h-12 bg-white text-gray-600 rounded-full border border-gray-300 hover:bg-gray-50 transition-colors flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
-                    내서재에 담기
                   </button>
-                 
-                 <button className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50">
-                   <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                   </svg>
-                 </button>
-               </div>
-             </div>
+                </div>
+              </div>
         </div>
       </div>
       
-      {/* 요약 모달 */}
-      <SummaryModal />
-      
       {/* 서재 담기 모달 */}
       <LibraryModal />
+
+      {/* 책 뷰어 모달 */}
+      {showReaderModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-2xl w-11/12 h-5/6 max-w-6xl max-h-[90vh] flex flex-col">
+            {/* 모달 헤더 */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center gap-4">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  📖 {book?.title}
+                </h3>
+                <span className="text-sm text-gray-500">
+                  {currentPage} / {book?.totalPages || '?'} 페이지
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                {/* 페이지 네비게이션 */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage <= 1}
+                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  ← 이전
+                </button>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(book?.totalPages || prev, prev + 1))}
+                  disabled={currentPage >= (book?.totalPages || 1)}
+                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  다음 →
+                </button>
+                <button
+                  onClick={() => setShowReaderModal(false)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+
+            {/* 책 내용 */}
+            <div className="flex-1 p-6 overflow-y-auto">
+              <div className="max-w-4xl mx-auto">
+                {/* 페이지 헤더 */}
+                <div className="text-center mb-8 pb-4 border-b border-gray-200">
+                  <h4 className="text-xl font-semibold text-gray-800 mb-2">
+                    {book?.title}
+                  </h4>
+                  <p className="text-gray-600">
+                    {book?.author} | {book?.publisher}
+                  </p>
+                </div>
+
+                {/* 요약 정보 섹션 (요약 보기 모드에서만 표시) */}
+                {showSummary && (
+                  <>
+                    <div className="mb-8">
+                      <h5 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+                        📚 읽은 내용 요약
+                      </h5>
+                      
+                      {/* p.12까지의 요약 */}
+                      <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
+                        <h6 className="text-lg font-bold text-blue-900 mb-3">
+                          📖 p.12까지의 요약 정보
+                        </h6>
+                        <div className="bg-white rounded-lg p-4 border border-blue-100">
+                          <p className="text-gray-800 leading-relaxed">
+                            화자는 어린 시절 보아뱀 그림으로 오해받으며 화가의 꿈을 접고 비행사가 된다. 
+                            사하라 사막에 불시착한 후 어린 왕자를 만나고, 왕자의 "양을 그려 달라"는 부탁을 
+                            여러 번 거절하다가 결국 상자 그림으로 만족을 얻으며 두 사람의 만남이 시작된다.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* p.55까지의 요약 */}
+                      <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+                        <h6 className="text-lg font-bold text-green-900 mb-3">
+                          📖 p.55까지의 요약 정보
+                        </h6>
+                        <div className="bg-white rounded-lg p-4 border border-green-100">
+                          <p className="text-gray-800 leading-relaxed mb-3">
+                            화자는 어린 시절 보아뱀이 코끼리를 삼킨 그림을 그렸으나, 어른들이 이해하지 못해 화가의 꿈을 포기하고 비행사가 된다. 그러던 중 사하라 사막에 불시착하게 되고, 그곳에서 신비롭고 진지한 아이인 어린 왕자를 만난다. 어린 왕자는 "양을 그려 달라"고 부탁하며 화자와 친구가 된다.
+                          </p>
+                          <p className="text-gray-800 leading-relaxed mb-3">
+                            대화를 나누며 어린 왕자가 작은 별(소행성 B612)에서 왔음을 알게 된다. 그 별에는 바오밥나무 같은 위험한 싹이 있어 매일 뽑아야 하고, 의자만 옮기면 여러 번 해질녘을 볼 수 있을 만큼 작다. 어린 왕자는 해질녘을 사랑하며, 그만큼 외롭고 쓸쓸한 마음을 드러낸다.
+                          </p>
+                          <p className="text-gray-800 leading-relaxed mb-3">
+                            그는 특히 자신의 별에 핀 단 하나뿐인 꽃을 소중히 여긴다. 그 꽃은 까다롭고 허영심도 있지만, 동시에 연약한 존재였다. 어린 왕자는 꽃을 사랑했지만 그 마음을 제대로 표현하지 못했고, 꽃의 모순된 말들에 상처받아 결국 별을 떠나기로 결심한다. 꽃은 떠나는 순간에야 진심을 털어놓으며 어린 왕자를 사랑했다고 고백하지만, 이미 그는 철새들의 무리를 따라 여행길에 오른다.
+                          </p>
+                          <p className="text-gray-800 leading-relaxed mb-3">
+                            별을 떠나기 전, 어린 왕자는 화산들을 청소하고 바오밥 씨앗을 뽑으며 자신의 별을 정리한다. 마지막으로 꽃에게 작별 인사를 나누는데, 꽃은 더 이상 유리 덮개도, 바람막이도 필요 없다며 자존심을 지킨 채 눈물을 감춘다. 어린 왕자는 아쉬움을 품고 떠난다.
+                          </p>
+                          <p className="text-gray-800 leading-relaxed">
+                            그가 처음 방문한 별은 왕이 사는 별이다. 왕은 절대권력을 자처하지만, 실제로는 명령을 현실에 맞게 내리는 '겉만 위엄 있는 인물'이다. 어린 왕자는 왕의 권위가 허망하다는 것을 느끼고 곧 그곳을 떠난다.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 구분선 */}
+                    <div className="w-full h-px bg-gray-300 my-8"></div>
+                  </>
+                )}
+
+                {/* 책 내용 (바로 읽기 모드에서는 요약 없이, 요약 보기 모드에서는 요약 아래에 표시) */}
+                <div className="prose prose-lg max-w-none">
+                  <div className="text-gray-800 leading-relaxed space-y-4">
+                    {showSummary ? (
+                      // 요약 보기 모드: 간단한 안내 텍스트
+                      <>
+                        <p>
+                          위의 요약 정보를 확인했습니다. 이제 도서의 실제 내용을 읽어보세요.
+                        </p>
+                        <p>
+                          페이지 네비게이션을 통해 이전/다음 페이지로 이동할 수 있으며,
+                          각 페이지마다 해당 도서의 실제 내용이 렌더링됩니다.
+                        </p>
+                      </>
+                    ) : (
+                      // 바로 읽기 모드: 실제 책 내용 (하드코딩)
+                      <>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                          어린 왕자 - 1장
+                        </h3>
+                        <p>
+                          내가 여섯 살 때 한 번은 원시림을 다룬 『생명체 이야기』라는 책에서 굉장한 그림 하나를 본 적이 있는데. 
+                          그건 야수를 한 입에 삼킨 보아 뱀에 관한 얘기였어. 여기 이 그림이 그거야.
+                        </p>
+                        <div className="text-center my-6">
+                          <div className="inline-block p-4 bg-gray-100 rounded-lg">
+                            <p className="text-lg font-semibold text-gray-700">황갈색 보아 뱀</p>
+                          </div>
+                        </div>
+                        <p>
+                          책엔 이렇게 쓰여 있더라고, 보아 뱀은 씹지도 않고 산 채로 먹이를 삼킨데. 
+                          그런 다음엔 소화를 위해 여섯 달 동안 꿈쩍도 않고 잠만 잔데.
+                        </p>
+                        <p>
+                          난 정말 이 얘기를 듣고 정글의 모험에 관한 많은 생각들이 들더라, 
+                          이어 색연필로 내 첫 번째 그림을 그려보게 시작했지. 바로 이게 그거야.
+                        </p>
+                        <p>
+                          어른들에게 내 걸작을 보여줬을 때, 그들이 겁에 질렸는지 물어봤어. 
+                          "겁에 질릴 게 뭐가 있어?"라고 대답했어. "보아 뱀이 코끼리를 삼키는 그림인데."
+                        </p>
+                        <p>
+                          그러자 어른들은 내 그림이 모자 모양이라고 했어. 
+                          그래서 나는 보아 뱀을 그려서 코끼리를 삼키는 모습을 그렸어. 
+                          어른들은 이해하지 못했어.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* 페이지 푸터 */}
+                <div className="text-center mt-8 pt-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-500">
+                    {currentPage}페이지
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 모달 푸터 */}
+            <div className="p-6 border-t border-gray-200 bg-gray-50">
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  밀리의 서재에서 제공하는 도서 뷰어입니다.
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    처음으로
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(book?.totalPages || 1)}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    마지막으로
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

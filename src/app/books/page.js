@@ -1,12 +1,30 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Link from 'next/link'
-import BookCard from '../../components/BookCard'
 
 export default function Books() {
-  // 날짜 포맷팅 함수
+  const [books, setBooks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    fetchBooks()
+  }, [])
+
+  const fetchBooks = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/api/books')
+      console.log('Books data:', response.data)
+      setBooks(response.data || [])
+    } catch (error) {
+      console.error('Error fetching books:', error)
+      setError('도서 목록을 불러오는 중 오류가 발생했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const formatDate = (dateString) => {
     if (!dateString) return '날짜 없음'
     const date = new Date(dateString)
@@ -17,159 +35,163 @@ export default function Books() {
     })
   }
 
-  const [books, setBooks] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-
-  const fetchBooks = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const response = await axios.get('http://localhost:8080/api/books')
-      console.log('Books data:', response.data) // 디버깅용
-      setBooks(response.data)
-    } catch (err) {
-      setError('책 목록을 불러오는 중 오류가 발생했습니다.')
-      console.error('Error fetching books:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchBooks()
-  }, [])
-
-  return (
-         <div className="min-h-screen p-8" style={{ backgroundColor: '#FAFAFA' }}>
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-                     <h1 className="text-3xl font-bold text-black mb-2">
-             📚 책 목록
-           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            도서관에 등록된 모든 책들을 확인할 수 있습니다.
-          </p>
-        </div>
-
-        {/* 새로고침 버튼 */}
-        <div className="mb-6 flex justify-between items-center">
-          <button
-            onClick={fetchBooks}
-            disabled={loading}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors flex items-center gap-2"
-          >
-            {loading ? (
-              <>
-                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                로딩 중...
-              </>
-            ) : (
-              <>
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                새로고침
-              </>
-            )}
-          </button>
-          
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            총 {books.length}권의 책
-          </div>
-        </div>
-
-        {/* 에러 메시지 */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            <div className="flex items-center gap-2">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {error}
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-white via-yellow-100 via-yellow-200 via-purple-200 to-purple-600">
+        {/* 헤더 */}
+        <header className="bg-white bg-opacity-90 backdrop-blur-sm shadow-sm">
+          <div className="pl-16 sm:pl-24 lg:pl-32 pr-16 sm:pr-24 lg:pr-32 h-20">
+            <div className="flex items-center justify-between h-full">
+              <h1 className="text-2xl font-bold text-gray-900">밀리의 서재</h1>
+              <div className="flex items-center space-x-4">
+                <Link href="/search" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
+                  🔍 검색
+                </Link>
+                <button className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
+                  📚 내 서재
+                </button>
+              </div>
             </div>
           </div>
-        )}
+        </header>
 
-        {/* 스크롤 힌트 */}
-        {books.length > 0 && (
-          <div className="text-center text-gray-500 dark:text-gray-400 text-sm mb-4">
-            ← 좌우로 스크롤하여 더 많은 책을 확인하세요 →
+        <div className="flex items-center justify-center min-h-[calc(100vh-5rem)]">
+          <div className="text-center">
+            <div className="text-2xl text-gray-700 mb-4">📚</div>
+            <div className="text-xl text-gray-600">도서 목록을 불러오는 중...</div>
           </div>
-        )}
+        </div>
+      </div>
+    )
+  }
 
-        {/* 책 목록 */}
-        {books.length > 0 ? (
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-white via-yellow-100 via-yellow-200 via-purple-200 to-purple-600">
+        {/* 헤더 */}
+        <header className="bg-white bg-opacity-90 backdrop-blur-sm shadow-sm">
+          <div className="pl-16 sm:pl-24 lg:pl-32 pr-16 sm:pr-24 lg:pr-32 h-20">
+            <div className="flex items-center justify-between h-full">
+              <h1 className="text-2xl font-bold text-gray-900">밀리의 서재</h1>
+              <div className="flex items-center space-x-4">
+                <Link href="/search" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
+                  🔍 검색
+                </Link>
+                <button className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
+                  📚 내 서재
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="flex items-center justify-center min-h-[calc(100vh-5rem)]">
+          <div className="text-center">
+            <div className="text-2xl text-red-600 mb-4">⚠️</div>
+            <div className="text-xl text-gray-600">{error}</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-white via-yellow-100 via-yellow-200 via-purple-200 to-purple-600">
+      {/* 헤더 */}
+      <header className="bg-white bg-opacity-90 backdrop-blur-sm shadow-sm">
+        <div className="pl-16 sm:pl-24 lg:pl-32 pr-16 sm:pr-24 lg:pr-32 h-20">
+          <div className="flex items-center justify-between h-full">
+            <h1 className="text-2xl font-bold text-gray-900">밀리의 서재</h1>
+            <div className="flex items-center space-x-4">
+              <Link href="/search" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
+                🔍 검색
+              </Link>
+              <Link href="/library" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
+                📚 내 서재
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 상단 메인 콘텐츠 - 메인 페이지와 동일한 배경 */}
+      <div className="flex items-center justify-between min-h-[calc(100vh-5rem)] pl-32 sm:pl-40 lg:pl-48 pr-40 sm:pr-48 lg:pr-56">
+        {/* 왼쪽: 메인 텍스트 */}
+        <div className="flex-1 pr-4 sm:pr-6 lg:pr-8">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight drop-shadow-lg" style={{ lineHeight: '1.7' }}>
+            <span className="text-black">독서와<br />
+            무제한 친해지리,</span><br />
+            <span className="text-orange-500">밀리의 서재</span>
+          </h2>
+        </div>
+        
+        {/* 오른쪽: 이미지들 */}
+        <div className="flex-1 flex justify-end pl-4 sm:pl-6 lg:pl-8">
+          {/* 두 권의 책을 겹치게 배치 */}
+          <div className="relative">
+            {/* 뒤쪽 책 (새로운 책) */}
+            <img
+              src="https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9781408855652.jpg"
+              alt="새로운 책 이미지"
+              className="max-w-md w-full h-auto rounded-lg shadow-lg transform rotate-3 translate-x-2"
+            />
+            {/* 앞쪽 책 (어린왕자) */}
+            <img
+              src="https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9791187192596.jpg"
+              alt="밀리의 서재 이미지"
+              className="max-w-md w-full h-auto rounded-lg shadow-lg absolute top-0 left-0 transform -rotate-2 -translate-x-2"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 하단 도서 목록 섹션 - 다른 배경색 */}
+      <div className="bg-gray-50 py-16">
+        <div className="pl-16 sm:pl-24 lg:pl-32 pr-16 sm:pr-24 lg:pr-32">
+          <h3 className="text-3xl font-bold text-gray-900 mb-8">📚 전체 도서 목록</h3>
+          
+          {/* 도서 가로 스크롤 */}
           <div className="overflow-x-auto scrollbar-hide">
             <div className="flex gap-6 pb-4" style={{ minWidth: 'max-content' }}>
               {books.map((book) => (
-                                 <Link 
-                   key={book.id} 
-                   href={`/books/${book.id}`}
-                   className="rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow flex-shrink-0 block"
-                   style={{ width: '180px' }}
-                 >
-                  {/* 책 표지 이미지 */}
-                  <div className="w-full h-72 overflow-hidden flex items-center justify-center">
-                    {(book.image_url || book.imageUrl) ? (
-                      <img
-                        src={book.image_url || book.imageUrl}
-                        alt={`${book.title} 표지`}
-                        className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.target.style.display = 'none'
-                          e.target.nextSibling.style.display = 'flex'
-                        }}
-                      />
-                    ) : null}
-                    <div className={`w-full h-full items-center justify-center text-gray-500 dark:text-gray-400 ${(book.image_url || book.imageUrl) ? 'hidden' : 'flex'}`}>
-                      <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                <div key={book.id} className="flex-shrink-0" style={{ width: '280px' }}>
+                  <Link href={`/books/${book.id}`} className="block">
+                    <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                      {/* 도서 이미지 */}
+                      <div className="h-64 bg-gray-100 flex items-center justify-center overflow-hidden">
+                        {book.imageUrl || book.image_url ? (
+                          <img
+                            src={book.imageUrl || book.image_url}
+                            alt={book.title}
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <div className="text-gray-400 text-6xl">📚</div>
+                        )}
+                      </div>
+                      
+                      {/* 도서 정보 */}
+                      <div className="p-3">
+                        <h4 className="font-bold text-lg text-black mb-1" style={{ fontSize: '17px' }}>
+                          {book.title}
+                        </h4>
+                        <p className="text-gray-600 mb-1">
+                          {book.author || '작자미상'}
+                        </p>
+                        {book.totalPages && (
+                          <p className="text-sm text-gray-500">
+                            {book.totalPages}페이지
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                                     {/* 책 정보 */}
-                   <div className="pt-2 pb-2">
-                                           {/* 책 제목 */}
-                      <h3 className="font-semibold text-black mb-1 line-clamp-2" style={{ fontSize: '17px' }}>
-                        {book.title}
-                      </h3>
-                    
-                    {/* 저자 */}
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                      {book.author}
-                    </div>
-
-                    {/* 페이지 수 */}
-                    <div className="text-sm text-gray-500 dark:text-gray-500">
-                      📄 {book.totalPages}페이지
-                    </div>
-                   </div>
-                </Link>
-             ))}
-           </div>
-         </div>
-       ) : (
-         /* 빈 상태 */
-         <div className="text-center py-12">
-           <div className="mb-4">
-             <svg className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-             </svg>
-           </div>
-           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-             책이 없습니다
-           </h3>
-           <p className="text-gray-500 dark:text-gray-400">
-             {loading ? '책 목록을 불러오는 중입니다...' : '등록된 책이 없습니다.'}
-           </p>
-         </div>
-       )}
-     </div>
-   </div>
- )
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
